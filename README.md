@@ -1,6 +1,6 @@
-# 南充柑橘 · WebGIS 识别展示系统
+# 面向南充市特色农业资源管理的柑橘林空间分布识别与 WebGIS 可视化平台
 
-> Nanchong Citrus — Remote Sensing Classification & WebGIS Visualization
+> Citrus Forest Spatial Distribution Identification & WebGIS Visualization Platform for Nanchong's Specialty Agricultural Resource Management
 
 基于 **ArcGIS JS API 4.18** 构建的柑橘林地遥感识别结果可视化平台，围绕「多算法分类成果展示」与「工程实践 GIS 功能」两条主线，完整覆盖 WebGIS 开发的核心能力：地图服务集成、矢量数据渲染、空间查询、空间分析、专题制图与结果统计。
 
