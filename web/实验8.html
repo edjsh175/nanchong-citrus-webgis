@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>实验8 - 南充市柑橘林地识别与 WebGIS 展示</title>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.18/esri/themes/light/main.css">
+  <link rel="stylesheet" href="css/style.css?v=20260611-print-layout-full-page">
+  <script src="https://js.arcgis.com/4.18/"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="title-block">
+        <h1>南充市柑橘林地多算法识别与 WebGIS 展示系统</h1>
+        <span>分类成果展示 + 工程实践 4 功能映射</span>
+      </div>
+      <nav class="top-actions" aria-label="算法与地图工具">
+        <button class="method-tab is-active" data-algorithm="maximumLikelihood">最大似然法原版</button>
+        <button class="method-tab" data-algorithm="maximumLikelihoodRemake">最大似然法重制版</button>
+        <button class="method-tab" data-algorithm="randomTrees">Random Trees</button>
+        <button class="method-tab" data-algorithm="svm">SVM</button>
+        <button class="ghost-button" id="btnCompare">左右对比</button>
+        <button class="ghost-button" id="btnPrevView">前一视图</button>
+        <button class="ghost-button" id="btnNextView">后一视图</button>
+        <button class="ghost-button" id="btnZoomIn">放大</button>
+        <button class="ghost-button" id="btnZoomOut">缩小</button>
+      </nav>
+    </header>
+
+    <main class="workspace">
+      <aside class="side-panel left-panel" aria-label="图层与工具">
+        <section class="panel-section">
+          <h2>数据源</h2>
+          <p class="muted">分类成果优先加载 ArcGIS Server 真实服务；基础矢量和 DEM 服务图层用于工程实践功能映射。</p>
+          <div class="status-pill" id="serviceStatus">服务状态：等待加载</div>
+
+          <label class="field-label" for="basemapSelect">底图</label>
+          <select id="basemapSelect"></select>
+
+          <div class="subsection-title">基础矢量 / 专题矢量</div>
+          <div id="assessmentLayerList" class="layer-list"></div>
+
+          <div class="subsection-title">DEM / 地形服务</div>
+          <div id="demLayerList" class="layer-list"></div>
+        </section>
+
+        <section class="panel-section">
+          <h2>分类结果</h2>
+          <label class="field-label" for="algorithmSelect">算法</label>
+          <select id="algorithmSelect">
+            <option value="maximumLikelihood">最大似然法原版</option>
+            <option value="maximumLikelihoodRemake">最大似然法重制版</option>
+            <option value="randomTrees">Random Trees</option>
+            <option value="svm">SVM</option>
+          </select>
+
+          <div class="segmented" role="group" aria-label="结果模式">
+            <button class="is-active" data-mode="full">四分类</button>
+            <button data-mode="citrus">仅柑橘</button>
+          </div>
+
+          <label class="range-row" for="opacityRange">
+            <span>分类透明度</span>
+            <strong id="opacityValue">100%</strong>
+          </label>
+          <input id="opacityRange" type="range" min="0" max="100" value="100">
+
+          <label class="check-row">
+            <input type="checkbox" id="toggleServiceLayer" checked>
+            <span>显示当前分类结果</span>
+          </label>
+
+          <div class="subsection-title">活动矢量图层</div>
+          <label class="field-label" for="activeVectorLayerSelect">当前图层</label>
+          <select id="activeVectorLayerSelect"></select>
+
+          <label class="field-label" for="vectorRendererSelect">渲染模式</label>
+          <select id="vectorRendererSelect">
+            <option value="single">单值渲染</option>
+            <option value="unique">唯一值渲染</option>
+            <option value="classBreaks">分级渲染</option>
+          </select>
+
+          <label class="check-row">
+            <input type="checkbox" id="toggleVectorLabels">
+            <span>显示属性标注</span>
+          </label>
+
+          <label class="field-label" for="vectorLabelFieldSelect">标注字段</label>
+          <select id="vectorLabelFieldSelect"></select>
+        </section>
+
+        <section class="panel-section">
+          <h2>绘制与查询</h2>
+          <div class="button-grid">
+            <button class="tool-button" id="drawPoint">绘点</button>
+            <button class="tool-button" id="drawLine">绘线</button>
+            <button class="tool-button" id="drawPolygon">绘面</button>
+            <button class="tool-button" id="clearDrawings">清空图元</button>
+          </div>
+
+          <details class="tool-group" open>
+            <summary>点查与范围查询</summary>
+            <label class="field-label" for="queryTargetSelect">点击查询对象</label>
+            <select id="queryTargetSelect">
+              <option value="classification">当前分类结果</option>
+              <option value="vector">活动矢量图层</option>
+            </select>
+
+            <div class="button-grid query-grid">
+              <button class="tool-button" id="btnPointQuery">点击查询</button>
+              <button class="tool-button" id="btnRectQuery">矩形查询</button>
+              <button class="tool-button" id="btnCircleQuery">圆形查询</button>
+              <button class="tool-button" id="btnPolygonQuery">多边形查询</button>
+            </div>
+          </details>
+
+          <details class="tool-group" open>
+            <summary>属性查询</summary>
+            <label class="field-label" for="attributeFieldSelect">查询字段</label>
+            <select id="attributeFieldSelect"></select>
+
+            <label class="field-label" for="attributeOperatorSelect">条件</label>
+            <select id="attributeOperatorSelect">
+              <option value="contains">包含</option>
+              <option value="equals">等于</option>
+              <option value="startsWith">前缀匹配</option>
+              <option value="greaterThan">大于</option>
+              <option value="lessThan">小于</option>
+            </select>
+
+            <label class="field-label" for="attributeKeyword">关键字 / 数值</label>
+            <input id="attributeKeyword" class="url-input" type="text" placeholder="输入属性值或关键字">
+
+            <button class="primary-button full-width" id="btnAttributeQuery">执行属性查询</button>
+          </details>
+
+          <details class="tool-group" open>
+            <summary>空间分析</summary>
+            <label class="field-label" for="spatialTargetLayerSelect">目标图层</label>
+            <select id="spatialTargetLayerSelect"></select>
+
+            <label class="field-label" for="bufferDistanceInput">缓冲距离（米）</label>
+            <input id="bufferDistanceInput" class="url-input" type="number" min="100" step="100" value="3000">
+
+            <div class="button-grid query-grid">
+              <button class="tool-button" id="btnBufferQuery">缓冲区查询</button>
+              <button class="tool-button" id="btnIntersectQuery">相交查询</button>
+              <button class="tool-button" id="btnClipQuery">裁剪分析</button>
+              <button class="tool-button" id="btnDistanceStats">距离统计</button>
+            </div>
+          </details>
+
+          <div class="status-text" id="queryStatus">查询状态：待操作</div>
+        </section>
+
+        <section class="panel-section">
+          <h2>打印地图</h2>
+          <div id="printPanel" class="print-panel"></div>
+        </section>
+      </aside>
+
+      <section class="map-area" aria-label="地图视图">
+        <div id="mainMapShell" class="map-shell">
+          <div id="mainViewDiv" class="map-view"></div>
+          <div id="overviewDiv" class="overview-map"></div>
+        </div>
+        <div id="compareShell" class="compare-shell is-hidden">
+          <div class="compare-pane">
+            <div class="pane-toolbar">
+              <label for="leftAlgorithm">左侧</label>
+              <select id="leftAlgorithm">
+                <option value="maximumLikelihood">最大似然法原版</option>
+                <option value="maximumLikelihoodRemake">最大似然法重制版</option>
+                <option value="randomTrees">Random Trees</option>
+                <option value="svm">SVM</option>
+              </select>
+            </div>
+            <div id="leftViewDiv" class="map-view"></div>
+          </div>
+          <div class="compare-pane">
+            <div class="pane-toolbar">
+              <label for="rightAlgorithm">右侧</label>
+              <select id="rightAlgorithm">
+                <option value="maximumLikelihood">最大似然法原版</option>
+                <option value="maximumLikelihoodRemake">最大似然法重制版</option>
+                <option value="randomTrees" selected>Random Trees</option>
+                <option value="svm">SVM</option>
+              </select>
+            </div>
+            <div id="rightViewDiv" class="map-view"></div>
+          </div>
+        </div>
+        <div class="coordinate-bar">
+          <span id="coordDisplay">经度：- 纬度：-</span>
+          <span id="scaleDisplay">比例尺：--</span>
+          <button id="btnHome" class="small-button">回到南充</button>
+        </div>
+      </section>
+
+      <aside class="side-panel right-panel" aria-label="统计与结果">
+        <section class="panel-section">
+          <h2>当前算法说明</h2>
+          <div id="algorithmInfo" class="algorithm-info"></div>
+        </section>
+
+        <section class="panel-section">
+          <h2>统一图例</h2>
+          <div id="legendList" class="legend-list"></div>
+        </section>
+
+        <section class="panel-section">
+          <h2>面积统计</h2>
+          <div id="areaStats" class="stats-grid"></div>
+        </section>
+
+        <section class="panel-section">
+          <h2>精度评价</h2>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>算法</th>
+                <th>总体</th>
+                <th>Kappa</th>
+              </tr>
+            </thead>
+            <tbody id="accuracyBody"></tbody>
+          </table>
+        </section>
+
+        <section class="panel-section">
+          <h2>查询结果</h2>
+          <div id="resultPanel" class="result-panel">暂无查询结果。</div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script src="js/service-config.js"></script>
+  <script src="data/assessment-data.js?v=20260611-admin-districts"></script>
+  <script src="js/config.js"></script>
+  <script src="data/demo-data.js"></script>
+  <script src="js/app.js?v=20260611-print-layout-full-page"></script>
+</body>
+</html>
