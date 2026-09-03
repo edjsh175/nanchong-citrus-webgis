@@ -4,6 +4,8 @@
 
 基于 **ArcGIS JS API 4.18** 构建的柑橘林地遥感识别结果可视化平台，围绕「多算法分类成果展示」与「工程实践 GIS 功能」两条主线，完整覆盖 WebGIS 开发的核心能力：地图服务集成、矢量数据渲染、空间查询、空间分析、专题制图与结果统计。
 
+![系统主界面：柑橘分类成果展示与图层 / 查询 / 分析面板](docs/images/screenshot-overview.jpg)
+
 | 技术栈 | 说明 |
 | --- | --- |
 | ArcGIS JS API | 4.18（AMD 模块化加载） |
@@ -77,16 +79,16 @@
 ```
 webgis-南充柑橘/
 ├── web/
-│   ├── 实验8.html                 # 系统入口页
-│   ├── css/style.css              # 样式（三栏布局 + 响应式）
+│   ├── index.html                # 系统入口页
+│   ├── css/style.css             # 样式（三栏布局 + 响应式）
 │   ├── js/
-│   │   ├── app.js                 # 核心逻辑（地图、图层、查询、分析）
-│   │   ├── config.js              # 全局配置（算法服务 / 底图 / 参数）
-│   │   └── service-config.js      # 服务地址与 Token 覆盖
+│   │   ├── app.js                # 核心逻辑（地图、图层、查询、分析）
+│   │   ├── config.js             # 全局配置（算法服务 / 底图 / 参数）
+│   │   └── service-config.js     # 服务地址与 Token 覆盖
 │   ├── data/
-│   │   ├── assessment-data.js     # 矢量 / DEM 图层声明式配置
-│   │   ├── demo-data.js           # 演示数据与统计精度
-│   │   └── vector/                # GeoJSON 矢量数据
+│   │   ├── assessment-data.js    # 矢量 / DEM 图层声明式配置
+│   │   ├── demo-data.js          # 演示数据与统计精度
+│   │   └── vector/               # GeoJSON 矢量数据
 │   │       ├── admin-boundary.geojson
 │   │       ├── citrus-parcels.geojson
 │   │       ├── rivers.geojson
@@ -94,7 +96,11 @@ webgis-南充柑橘/
 │   ├── scripts/
 │   │   └── build-vector-geojson.js # 矢量数据构建脚本
 │   └── tests/
-│       └── static-checks.js        # 静态校验脚本
+│       └── static-checks.js       # 静态校验脚本
+├── docs/
+│   └── images/                   # README 用截图
+├── .github/
+│   └── workflows/                # GitHub Pages 自动部署
 └── README.md
 ```
 
@@ -105,7 +111,7 @@ webgis-南充柑橘/
 1. 克隆仓库：
 
    ```bash
-   git clone git@github.com:<your-name>/nanchong-citrus-webgis.git
+   git clone git@github.com:edjsh175/nanchong-citrus-webgis.git
    ```
 
 2. 启动本地静态服务器（`web/` 为站点根目录）：
@@ -115,7 +121,9 @@ webgis-南充柑橘/
    python -m http.server 8080
    ```
 
-3. 浏览器打开 `http://localhost:8080/实验8.html`
+3. 浏览器打开 `http://localhost:8080/index.html`
+
+> **在线预览**：本项目已启用 GitHub Pages，访问 <https://edjsh175.github.io/nanchong-citrus-webgis/> 可直接查看在线演示（分类成果与 DEM 服务需本地 ArcGIS Server，未启动时自动降级为内置演示数据）。
 
 > **说明**：分类成果服务与 DEM 服务默认指向 `https://localhost:6443/arcgis/...`（本地 ArcGIS Server）。未启动服务时，系统自动降级为内置演示数据，矢量图层、查询与分析功能仍可完整演示。服务地址与天地图 Token 可在 `web/js/service-config.js` 中修改（仓库内的 Token 已置空，部署时需自行填写）。
 

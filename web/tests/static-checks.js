@@ -30,7 +30,7 @@ function loadBrowserGlobal(relativePath, globalName, preloads = []) {
 
 function checkFiles() {
   [
-    "实验8.html",
+    "index.html",
     "css/style.css",
     "scripts/build-vector-geojson.js",
     "js/service-config.js",
@@ -46,7 +46,7 @@ function checkFiles() {
 }
 
 function checkHtmlWiring() {
-  const html = read("实验8.html");
+  const html = read("index.html");
   [
     "https://js.arcgis.com/4.18/",
     "css/style.css",
@@ -84,23 +84,23 @@ function checkHtmlWiring() {
     'id="btnNextView"',
     'id="btnZoomIn"',
     'id="btnZoomOut"'
-  ].forEach((needle) => assert(html.includes(needle), `实验8.html must include ${needle}`));
+  ].forEach((needle) => assert(html.includes(needle), `index.html must include ${needle}`));
 
   assert(
     html.indexOf("js/service-config.js") < html.indexOf("js/config.js"),
-    "实验8.html must load service-config.js before config.js"
+    "index.html must load service-config.js before config.js"
   );
   assert(
     html.indexOf("data/assessment-data.js") < html.indexOf("js/config.js"),
-    "实验8.html must load assessment-data.js before config.js"
+    "index.html must load assessment-data.js before config.js"
   );
-  assert(html.includes("显示当前分类结果"), "实验8.html must retain the result visibility toggle");
-  assert(html.includes("DEM / 地形服务"), "实验8.html must label the DEM section as service-only");
-  assert(html.includes("data/assessment-data.js?v=20260611-admin-districts"), "实验8.html must bust the assessment-data.js cache after updating administrative districts");
-  assert(html.includes('id="opacityValue">100%<'), "实验8.html must default the opacity label to 100%");
-  assert(html.includes('id="opacityRange" type="range" min="0" max="100" value="100"'), "实验8.html must default the opacity slider to 100%");
+  assert(html.includes("显示当前分类结果"), "index.html must retain the result visibility toggle");
+  assert(html.includes("DEM / 地形服务"), "index.html must label the DEM section as service-only");
+  assert(html.includes("data/assessment-data.js?v=20260611-admin-districts"), "index.html must bust the assessment-data.js cache after updating administrative districts");
+  assert(html.includes('id="opacityValue">100%<'), "index.html must default the opacity label to 100%");
+  assert(html.includes('id="opacityRange" type="range" min="0" max="100" value="100"'), "index.html must default the opacity slider to 100%");
   ["btnDefense", "答辩模式", "DEM / 地形专题"].forEach((needle) => {
-    assert(!html.includes(needle), `实验8.html must remove ${needle}`);
+    assert(!html.includes(needle), `index.html must remove ${needle}`);
   });
 }
 
@@ -159,7 +159,7 @@ function checkConfig() {
   assert(serviceConfig.serviceUrls.maximumLikelihoodRemake.includes("re_mlc/MapServer"), "service-config must expose the remade maximum likelihood service URL");
   assert(serviceConfig.serviceUrls.randomTrees.includes("re_rf/MapServer"), "service-config must expose the Random Trees service URL");
   assert(serviceConfig.serviceUrls.svm.includes("re_svm/MapServer"), "service-config must expose the SVM service URL");
-  assert(serviceConfig.tianditu.token === "1533dff95cfa3724f6df5257696ae8d3", "service-config must expose the Tianditu token");
+  assert(serviceConfig.tianditu.token === "", "service-config must keep the Tianditu token blank (filled at deploy time)");
 
   assert(config.algorithmServices.maximumLikelihood.url.includes("MyMapService/MapServer"), "config must use the maximum likelihood service");
   assert(config.algorithmServices.maximumLikelihood.fullLayerId === 1, "maximum likelihood full mode must use layer 1");
